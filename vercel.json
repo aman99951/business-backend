@@ -1,11 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "budget_backend/**/*.py": {
+    "api/**/*.py": {
       "excludeFiles": "{tests/**,__tests__/**,**/*.test.py,**/test_*.py,fixtures/**,__fixtures__/**,static/**,assets/**}"
     }
   },
   "rewrites": [
-    { "source": "/(.*)", "destination": "budget_backend/wsgi.py" }
+    { "source": "/(.*)", "destination": "/api/wsgi.py" }
   ]
 }

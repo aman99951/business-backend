@@ -126,9 +126,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic will copy files here
+STATIC_ROOT = BASE_DIR / 'staticfiles'  
 
-# Optional but recommended for performance:
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
