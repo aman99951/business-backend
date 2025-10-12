@@ -69,6 +69,9 @@ CORS_ALLOW_CREDENTIALS = True
 # Allow Authorization header if you ever use JWT:
 CORS_ALLOW_HEADERS = ["accept", "accept-encoding", "authorization", "content-type", "origin", "x-csrftoken"]
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
 ROOT_URLCONF = 'budget_backend.urls'
 
 TEMPLATES = [
