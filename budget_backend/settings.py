@@ -58,6 +58,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://business-frontend-ten.vercel.app",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
+    "https://business-frontend-ten.vercel.app",
+]
+CORS_ALLOW_CREDENTIALS = True
+# Allow Authorization header if you ever use JWT:
+CORS_ALLOW_HEADERS = ["accept", "accept-encoding", "authorization", "content-type", "origin", "x-csrftoken"]
+
 ROOT_URLCONF = 'budget_backend.urls'
 
 TEMPLATES = [
@@ -152,23 +163,3 @@ REST_FRAMEWORK = {
 "rest_framework.filters.SearchFilter",
 ],
 }
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
-
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.vercel.app",
-    "https://business-frontend-ten.vercel.app",
-    "https://business-backend-tl5s.vercel.app",
-]
-
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = "None"     # allow cross-site
-SESSION_COOKIE_SAMESITE = "None"  # allow cross-site
-
-# Behind Vercel proxy
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-USE_X_FORWARDED_HOST = True
