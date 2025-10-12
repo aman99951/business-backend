@@ -1,0 +1,19 @@
+[build]
+  # Build: install deps + collect static into ./staticfiles
+  command = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+  publish = "staticfiles"  # Netlify serves these directly
+
+[functions]
+  directory = "netlify/functions"
+  # Netlify will pick the Python runtime automatically for .py functions
+
+# Serve /static/* directly; send everything else to the Django function
+[[redirects]]
+  from = "/static/*"
+  to = "/static/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/django"
+  status = 200
