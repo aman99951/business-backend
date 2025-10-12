@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-ncnzdz2@3h0ca1bgccaovctx0ew^(ka+-#vg537ys81vp65%9&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [  "localhost", "127.0.0.1",
+    ".vercel.app",                # any Vercel subdomain
+    "business-backend-tl5s.vercel.app",
+    "business-frontend-ten.vercel.app",
+    ]
 
 
 # Application definition
@@ -155,3 +159,19 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
+
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
+    "https://business-frontend-ten.vercel.app",
+    "https://business-backend-tl5s.vercel.app",
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"     # allow cross-site
+SESSION_COOKIE_SAMESITE = "None"  # allow cross-site
+
+# Behind Vercel proxy
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
