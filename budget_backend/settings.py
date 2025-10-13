@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import dj_database_url
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,13 +23,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ncnzdz2@3h0ca1bgccaovctx0ew^(ka+-#vg537ys81vp65%9&'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-ncnzdz2@3h0ca1bgccaovctx0ew^(ka+-#vg537ys81vp65%9&')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [  "*"
-    ]
+ALLOWED_HOSTS = [
+    '.vercel.app',
+    'localhost',
+    '127.0.0.1',
+    '*'  # Keep for development, but be careful in production
+]
 
 
 # Application definition
@@ -43,7 +50,6 @@ INSTALLED_APPS = [
     "django_filters",
     "corsheaders", 
     "finance",
-    
 ]
 
 MIDDLEWARE = [
@@ -52,7 +58,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'finance.middleware.DisableCSRFForAPI',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -61,14 +66,29 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "https://business-frontend-ten.vercel.app",
+    "http://localhost:3000",  # Add for local development
+    "http://localhost:5173",  # Add if using Vite
 ]
+
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
     "https://business-frontend-ten.vercel.app",
 ]
+
 CORS_ALLOW_CREDENTIALS = True
+
 # Allow Authorization header if you ever use JWT:
-CORS_ALLOW_HEADERS = ["accept", "accept-encoding", "authorization", "content-type", "origin", "x-csrftoken"]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
@@ -82,13 +102,13 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',  # Added missing debug context processor
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
-    
 ]
 
 WSGI_APPLICATION = 'budget_backend.wsgi.application'
@@ -97,11 +117,19 @@ WSGI_APPLICATION = 'budget_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# NEW: PostgreSQL support for Vercel deployment
+DATABASE_URL = os.environ.get(
+    'DATABASE_URL',
+    # This is your Neon database URL - used as default if no env variable is set
+    'postgresql://neondb_owner:npg_k3CLTOb4BtXl@ep-calm-violet-ade88lkg-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require'
+)
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
@@ -127,8 +155,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-AUTH_PASSWORD_VALIDATORS = []
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -152,18 +178,62 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# REST Framework configuration
 REST_FRAMEWORK = {
-"DEFAULT_AUTHENTICATION_CLASSES": [
-"rest_framework.authentication.TokenAuthentication",
-],
-"DEFAULT_PERMISSION_CLASSES": [
-"rest_framework.permissions.IsAuthenticated",
-],
-"DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-"PAGE_SIZE": 10,
-"DEFAULT_FILTER_BACKENDS": [
-"django_filters.rest_framework.DjangoFilterBackend",
-"rest_framework.filters.OrderingFilter",
-"rest_framework.filters.SearchFilter",
-],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.OrderingFilter",
+        "rest_framework.filters.SearchFilter",
+    ],
+    # Add JSON renderer for better API responses
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
 }
+
+# Logging configuration - helps debug errors in production
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
