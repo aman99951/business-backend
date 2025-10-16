@@ -64,17 +64,24 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://business-frontend-ten.vercel.app",
-    "http://localhost:3000",  # Add for local development
-    "http://localhost:5173",  # Add if using Vite
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$",
 ]
 
+# Keep local dev origins too
+CORS_ALLOWED_ORIGINS = [
+     "https://business-frontend-nmp7gvw7o-aman-kumars-projects-f277e079.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
+# CSRF: Django needs full URLs, but it supports wildcards via domains:
 CSRF_TRUSTED_ORIGINS = [
     "https://*.vercel.app",
-    "https://business-frontend-ten.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 
 # Allow Authorization header if you ever use JWT:
