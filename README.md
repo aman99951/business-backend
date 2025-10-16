@@ -12,7 +12,7 @@
 
 | Username | Password |
 |-----------|-----------|
-| test_user | test@12345 |
+| test | test@12345 |
 
 ## Admin Credentials
 🔗 [https://business-backend-chi.vercel.app/admin](https://business-backend-chi.vercel.app/admin)
